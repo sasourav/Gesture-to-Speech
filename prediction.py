@@ -11,6 +11,7 @@ from keras import backend as K
 from matplotlib import pyplot as plt
 from sklearn.metrics import roc_curve, auc
 
+#Initializing
 batch_size = 128
 num_classes = 10
 epochs = 50
@@ -29,18 +30,18 @@ y_train = []
 x_test = []
 y_test = []
 for i in range(0, 10):
-    files = os.listdir('2/train_set/' + str(i) + '/')  # Reads each images of folders one by one
+    files = os.listdir('Dataset/train_set/' + str(i) + '/')  # Reads each images of folders one by one
     for file in files:
-        filename = '2/train_set/' + str(i) + '/' + file
+        filename = 'Dataset/train_set/' + str(i) + '/' + file
         img = cv2.imread(filename, 0)
         img = cv2.resize(img, (32, 32))
         x_train.append(img)
         y_train.append(i)
 for i in range(0, 10):
-    files = os.listdir('2/test_set/' + str(i) + '/')  # Reads each images of folders one by one
+    files = os.listdir('Dataset/test_set/' + str(i) + '/')  # Reads each images of folders one by one
 
     for file in files:
-        filename = '2/test_set/' + str(i) + '/' + file
+        filename = 'Dataset/test_set/' + str(i) + '/' + file
         img = cv2.imread(filename, 0)
         img = cv2.resize(img, (32, 32))
         x_test.append(img)
@@ -71,6 +72,7 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
+#CNN Model
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
@@ -86,11 +88,14 @@ model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
+
+#Load weight
 model.load_weights('weight.h5', by_name=True)
+
+#...............................Prediction Part...................................
 import cv2
 arr=[]
-prediction=0
-img = cv2.imread('E:/ML/s/Fresh Image/t/4 (1).jpg',0)
+img = cv2.imread('Fresh Image/s/1 (1).jpg',0)
 img1 = cv2.resize(img, (32, 32))
 img2 = img1.reshape(1, 32, 32, 1)
 print(model.predict(img2))
@@ -99,38 +104,26 @@ for i in range(0, 10):
     if arr[0][i] == 1:
         prediction = i
         break
-print(prediction)
+print(prediction) #Prediction result print
+
+#Translating prediction to Bangla using googletrans API
 pred=str(prediction)
 from googletrans import Translator
-import os
 translator = Translator()
 translations = translator.translate([pred], dest='bn')
 for translation in translations:
     print(translation.origin, ' -> ', translation.text)
 
+#Converting Bangla text to speech using gTTS API
 from gtts import gTTS
 text = pred
 targetLanguage = 'bn'
 tts = gTTS(text, targetLanguage)
-tts.save("9.mp3")
-os.system('9.mp3')
-# The matrix part
-'''from sklearn import metrics
-import numpy as np
+tts.save('1.mp3')
+os.system('1.mp3')
 
-ytest = [np.where(r == 1)[0][0] for r in y_test]
-Y_pred = model.predict(x_test)
-y_pred = np.argmax(Y_pred, axis=1)
-print('Confusion Matrix')
-print(ytest)
-print(type(x_test))
-print(type(y_test))
 
-print(metrics.confusion_matrix(ytest, y_pred))
-print(metrics.f1_score(ytest, y_pred, average='macro'))
-print(metrics.mean_absolute_error(ytest, y_pred))
-print(metrics.mean_squared_error(ytest, y_pred))'''
-
+#Visualizations
 # The ROC curve part
 '''import numpy as np
 from scipy import interp
